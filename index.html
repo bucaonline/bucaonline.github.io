@@ -2,7 +2,77 @@
 <html>
 <head>
   <title>BucaOnline</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin:0; padding:0;
+      display:flex; flex-direction:column; height:100vh;
+      background-color:#36393f; color:#dcddde;
+      transition: background 0.4s, color 0.4s;
+    }
+    #topBar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 20px; background:#2f3136;
+      font-weight:bold; font-size:1.2em;
+      color:#7289da;
+      box-shadow:0 2px 4px rgba(0,0,0,0.2);
+      position:relative;
+      transition: background 0.4s, color 0.4s;
+    }
+    #settingsBtn {
+      cursor:pointer; font-size:1.2em; padding:5px;
+      display:flex; align-items:center; justify-content:center;
+      transition: transform 0.5s ease, color 0.5s;
+    }
+    #settingsBtn.rotate { transform: rotate(90deg); }
+    #settingsMenu {
+      position:absolute; top:40px; right:20px;
+      background:#2f3136; border:1px solid #202225;
+      border-radius:6px; padding:10px; z-index:100;
+      width:200px; box-shadow:0 2px 6px rgba(0,0,0,0.3);
+      opacity:0; transform:translateY(-10px); pointer-events:none;
+      transition: all 0.3s ease-in-out;
+    }
+    #settingsMenu.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+    #settingsMenu label { display:block; margin:5px 0 2px 0; font-size:0.9em; }
+    #settingsMenu input[type="text"] {
+      width:100%; padding:4px; border-radius:4px; border:1px solid #202225;
+      background:#303339; color:#dcddde; transition: background 0.3s,color 0.3s;
+    }
+    #settingsMenu button {
+      margin-top:8px; padding:5px 8px; background:#7289da; border:none; border-radius:4px;
+      color:white; cursor:pointer; transition:background 0.3s;
+    }
+    #chat {
+      flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px;
+      transition: background 0.4s,color 0.4s;
+    }
+    .message {
+      display:flex; align-items:flex-start; background:#2f3136; padding:10px 14px;
+      border-radius:12px; max-width:70%; color:#dcddde; position:relative;
+      transition: background 0.4s,color 0.4s;
+    }
+    .message.light { background:#e5e5e5; color:#111; }
+    .avatar {
+      width:42px; height:42px; border-radius:50%; margin-right:10px; flex-shrink:0;
+      background:#7289da; display:flex; align-items:center; justify-content:center; transition: background 0.4s;
+    }
+    .avatar svg { width:24px; height:24px; fill:white; transition: fill 0.4s; }
+    .avatar:hover { background:#5b6eae; }
+    .content { display:flex; flex-direction:column; }
+    .username { font-weight:bold; color:#7289da; margin-bottom:3px; transition: color 0.4s; }
+    .username.light { color:#2f3136; }
+    .time { color:#72767d; font-size:0.75em; align-self:flex-end; margin-top:4px; transition:color 0.4s; }
+    #inputArea { display:flex; padding:10px; background:#40444b; gap:5px; transition:background 0.4s; }
+    #inputArea.light { background:#d0d0d0; }
+    #message { flex:1; padding:5px; border:1px solid #202225; border-radius:4px;
+      background:#303339; color:#dcddde; transition: background 0.4s,color 0.4s;
+    }
+    #message.light { background:white; color:black; border:1px solid #999; }
+    button.sendBtn { padding:5px 10px; border-radius:4px; border:none; background:#7289da; color:white; cursor:pointer; transition:background 0.3s; }
+    button.sendBtn:hover { background:#5b6eae; }
+    ::placeholder { color:#72767d; transition:color 0.4s; }
+  </style>
 </head>
 <body>
 
@@ -10,12 +80,12 @@
   BucaOnline
   <span id="settingsBtn">&#9881;</span>
   <div id="settingsMenu">
-    <label for="themeToggle">Tema:</label>
+    <label>Tema:</label>
     <button id="themeToggle">Koyu / Açık</button>
-    <label for="newAvatar">Avatar:</label>
+    <label>Avatar:</label>
     <input type="text" id="newAvatar" placeholder="Yeni avatar URL">
     <button onclick="updateAvatar()">Güncelle</button>
-    <label for="newName">Kullanıcı adı:</label>
+    <label>Kullanıcı adı:</label>
     <input type="text" id="newName" placeholder="Yeni kullanıcı adı">
     <button onclick="updateUsername()">Güncelle</button>
   </div>
@@ -51,32 +121,27 @@ const themeToggle=document.getElementById("themeToggle");
 themeToggle.onclick=()=>{
   const isLight=document.body.dataset.theme==="light";
   setTheme(isLight?"dark":"light");
-  settingsBtn.style.color = isLight ? "#dcddde" : "#2f3136"; 
 }
 
 function setTheme(mode){
+  const chat=document.getElementById("chat");
+  const inputArea=document.getElementById("inputArea");
+  const messageInput=document.getElementById("message");
+  const topBar=document.getElementById("topBar");
   if(mode==="light"){
     document.body.dataset.theme="light";
-    document.body.style.backgroundColor="#f0f0f0";
-    document.body.style.color="black";
-    document.getElementById("chat").style.backgroundColor="#e0e0e0";
-    document.getElementById("inputArea").style.backgroundColor="#d0d0d0";
-    document.getElementById("message").style.backgroundColor="white";
-    document.getElementById("message").style.color="black";
-    document.getElementById("topBar").style.backgroundColor="#d0d0d0";
-    document.getElementById("topBar").style.color="#2f3136";
-    settingsBtn.style.color="#2f3136";
+    document.body.style.background="#f0f0f0"; document.body.style.color="black";
+    chat.style.background="#e0e0e0";
+    inputArea.classList.add("light");
+    messageInput.classList.add("light");
+    topBar.style.background="#d0d0d0"; topBar.style.color="#2f3136";
   }else{
     document.body.dataset.theme="dark";
-    document.body.style.backgroundColor="#36393f";
-    document.body.style.color="#dcddde";
-    document.getElementById("chat").style.backgroundColor="#36393f";
-    document.getElementById("inputArea").style.backgroundColor="#40444b";
-    document.getElementById("message").style.backgroundColor="#303339";
-    document.getElementById("message").style.color="#dcddde";
-    document.getElementById("topBar").style.backgroundColor="#2f3136";
-    document.getElementById("topBar").style.color="#7289da";
-    settingsBtn.style.color="#dcddde";
+    document.body.style.background="#36393f"; document.body.style.color="#dcddde";
+    chat.style.background="#36393f";
+    inputArea.classList.remove("light");
+    messageInput.classList.remove("light");
+    topBar.style.background="#2f3136"; topBar.style.color="#7289da";
   }
 }
 
@@ -111,11 +176,12 @@ db.ref("messages").on("child_added",snapshot=>{
   div.innerHTML=`
     ${avatarContent}
     <div class="content">
-      <span class="username">${data.user}</span>
+      <span class="username ${document.body.dataset.theme==='light'?'light':''}">${data.user}</span>
       <span>${data.msg}</span>
       <span class="time">${hours}:${minutes}</span>
     </div>
   `;
+  if(document.body.dataset.theme==='light') div.classList.add("light");
   chatDiv.appendChild(div);
   chatDiv.scrollTop=chatDiv.scrollHeight;
 });
