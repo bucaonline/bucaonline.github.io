@@ -8,8 +8,9 @@
       overflow-y: auto;
       border: 1px solid #ccc;
       padding: 10px;
-      display: flex;
-      flex-direction: column-reverse; /* en yeni mesaj üstte */
+    }
+    #chat p {
+      margin: 5px 0;
     }
   </style>
 </head>
@@ -37,12 +38,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 function sendMessage() {
-  const user = document.getElementById("username").value;
-  const msg = document.getElementById("message").value;
-  if (!user || !msg) return; // boş mesaj göndermeyi engelle
+  const user = document.getElementById("username").value.trim();
+  const msg = document.getElementById("message").value.trim();
+  if (!user || !msg) return; // boş mesaj engelle
 
   db.ref("messages").push({ user, msg });
-  document.getElementById("message").value = ""; // mesajı temizle
+  document.getElementById("message").value = "";
 }
 
 db.ref("messages").on("child_added", (snapshot) => {
@@ -52,7 +53,15 @@ db.ref("messages").on("child_added", (snapshot) => {
   const p = document.createElement("p");
   p.innerHTML = `<b>${data.user}:</b> ${data.msg}`;
 
-  chatDiv.prepend(p); // en üste ekle
+  // yeni mesajı en üste ekle
+  if (chatDiv.firstChild) {
+    chatDiv.insertBefore(p, chatDiv.firstChild);
+  } else {
+    chatDiv.appendChild(p);
+  }
+
+  // otomatik scroll yukarıda kalacak
+  chatDiv.scrollTop = 0;
 });
 </script>
 
