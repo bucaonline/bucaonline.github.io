@@ -12,6 +12,11 @@
     #chat p {
       margin: 5px 0;
     }
+    .time {
+      color: gray;
+      font-size: 0.8em;
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
@@ -42,7 +47,8 @@ function sendMessage() {
   const msg = document.getElementById("message").value.trim();
   if (!user || !msg) return; // boş mesaj engelle
 
-  db.ref("messages").push({ user, msg });
+  const timestamp = Date.now(); // zamanı al
+  db.ref("messages").push({ user, msg, timestamp });
   document.getElementById("message").value = "";
 }
 
@@ -51,17 +57,23 @@ db.ref("messages").on("child_added", (snapshot) => {
   const chatDiv = document.getElementById("chat");
 
   const p = document.createElement("p");
-  p.innerHTML = `<b>${data.user}:</b> ${data.msg}`;
 
-  // yeni mesajı en üste ekle
+  // saat formatı: hh:mm
+  const date = new Date(data.timestamp);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const time = `<span class="time">${hours}:${minutes}</span>`;
+
+  p.innerHTML = `<b>${data.user}:</b> ${data.msg} ${time}`;
+
+  // yeni mesaj en üste
   if (chatDiv.firstChild) {
     chatDiv.insertBefore(p, chatDiv.firstChild);
   } else {
     chatDiv.appendChild(p);
   }
 
-  // otomatik scroll yukarıda kalacak
-  chatDiv.scrollTop = 0;
+  chatDiv.scrollTop = 0; // scroll hep en üstte
 });
 </script>
 
