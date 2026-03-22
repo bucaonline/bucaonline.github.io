@@ -3,19 +3,39 @@
 <head>
   <title>BucaOnline</title>
   <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
     #chat {
       height: 400px;
       overflow-y: auto;
       border: 1px solid #ccc;
       padding: 10px;
+      display: flex;
+      flex-direction: column-reverse; /* yeni mesaj üstte */
     }
-    #chat p {
+    .message {
+      background: #f1f1f1;
+      padding: 8px 12px;
       margin: 5px 0;
+      border-radius: 8px;
+      position: relative;
+      max-width: 70%;
+    }
+    .username {
+      font-weight: bold;
+      margin-right: 5px;
     }
     .time {
       color: gray;
-      font-size: 0.8em;
-      margin-left: 5px;
+      font-size: 0.75em;
+      position: absolute;
+      right: 5px;
+      bottom: 3px;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 5px;
     }
   </style>
 </head>
@@ -45,9 +65,9 @@ const db = firebase.database();
 function sendMessage() {
   const user = document.getElementById("username").value.trim();
   const msg = document.getElementById("message").value.trim();
-  if (!user || !msg) return; // boş mesaj engelle
+  if (!user || !msg) return;
 
-  const timestamp = Date.now(); // zamanı al
+  const timestamp = Date.now();
   db.ref("messages").push({ user, msg, timestamp });
   document.getElementById("message").value = "";
 }
@@ -56,24 +76,16 @@ db.ref("messages").on("child_added", (snapshot) => {
   const data = snapshot.val();
   const chatDiv = document.getElementById("chat");
 
-  const p = document.createElement("p");
+  const div = document.createElement("div");
+  div.className = "message";
 
-  // saat formatı: hh:mm
   const date = new Date(data.timestamp);
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
-  const time = `<span class="time">${hours}:${minutes}</span>`;
 
-  p.innerHTML = `<b>${data.user}:</b> ${data.msg} ${time}`;
+  div.innerHTML = `<span class="username">${data.user}:</span> ${data.msg} <span class="time">${hours}:${minutes}</span>`;
 
-  // yeni mesaj en üste
-  if (chatDiv.firstChild) {
-    chatDiv.insertBefore(p, chatDiv.firstChild);
-  } else {
-    chatDiv.appendChild(p);
-  }
-
-  chatDiv.scrollTop = 0; // scroll hep en üstte
+  chatDiv.prepend(div); // en üste ekle
 });
 </script>
 
