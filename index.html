@@ -119,7 +119,7 @@ const db = firebase.database();
 function sendMessage() {
   const user = document.getElementById("username").value.trim();
   const msg = document.getElementById("message").value.trim();
-  const avatar = document.getElementById("avatarURL").value.trim() || "https://i.imgur.com/8Km9tLL.png";
+  const avatar = document.getElementById("avatarURL").value.trim() || "https://scontent.fadb3-2.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s32x32&_nc_cat=110&ccb=1-7&_nc_sid=136b72&_nc_ohc=bk47vAGNFjMQ7kNvwFEK4tM&_nc_oc=Adr1vaFWrpS8wi1zKH-yzkKotvyHIcQgWUMwugOXW2LaRICy-SyENXd72tlVgOgSpIc&_nc_zt=24&_nc_ht=scontent.fadb3-2.fna&_nc_ss=7a30f&oh=00_Afx9---DW0xHR4sKU9RMIWrio8mRxSjfVfZ55Qjp0OAXBw&oe=69E702FA";
   if (!user || !msg) return;
 
   const timestamp = Date.now();
