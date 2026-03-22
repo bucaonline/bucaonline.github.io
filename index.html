@@ -2,6 +2,16 @@
 <html>
 <head>
   <title>BucaOnline</title>
+  <style>
+    #chat {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      display: flex;
+      flex-direction: column-reverse; /* en yeni mesaj üstte */
+    }
+  </style>
 </head>
 <body>
 
@@ -29,17 +39,20 @@ const db = firebase.database();
 function sendMessage() {
   const user = document.getElementById("username").value;
   const msg = document.getElementById("message").value;
+  if (!user || !msg) return; // boş mesaj göndermeyi engelle
 
-  db.ref("messages").push({
-    user,
-    msg
-  });
+  db.ref("messages").push({ user, msg });
+  document.getElementById("message").value = ""; // mesajı temizle
 }
 
 db.ref("messages").on("child_added", (snapshot) => {
   const data = snapshot.val();
-  document.getElementById("chat").innerHTML += 
-    `<p><b>${data.user}:</b> ${data.msg}</p>`;
+  const chatDiv = document.getElementById("chat");
+
+  const p = document.createElement("p");
+  p.innerHTML = `<b>${data.user}:</b> ${data.msg}`;
+
+  chatDiv.prepend(p); // en üste ekle
 });
 </script>
 
