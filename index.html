@@ -13,6 +13,17 @@
       background-color: #36393f;
       color: #dcddde;
     }
+    #topBar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 10px 20px;
+      background: #2f3136;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #7289da; /* Discord mor/indigo */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
     #chat {
       flex: 1;
       overflow-y: auto;
@@ -81,6 +92,8 @@
 </head>
 <body>
 
+<div id="topBar">BucaOnline</div>
+
 <div id="chat"></div>
 
 <div id="inputArea">
@@ -126,7 +139,7 @@ db.ref("messages").on("child_added", snapshot => {
   const minutes = String(date.getMinutes()).padStart(2, '0');
 
   div.innerHTML = `
-    <img class="avatar" src="${data.avatar}" onerror="this.src='https://scontent.fadb3-2.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s32x32&_nc_cat=110&ccb=1-7&_nc_sid=136b72&_nc_ohc=bk47vAGNFjMQ7kNvwFEK4tM&_nc_oc=Adr1vaFWrpS8wi1zKH-yzkKotvyHIcQgWUMwugOXW2LaRICy-SyENXd72tlVgOgSpIc&_nc_zt=24&_nc_ht=scontent.fadb3-2.fna&_nc_ss=7a30f&oh=00_Afx9---DW0xHR4sKU9RMIWrio8mRxSjfVfZ55Qjp0OAXBw&oe=69E702FA'">
+    <img class="avatar" src="${data.avatar}" onerror="this.src='https://i.imgur.com/8Km9tLL.png'">
     <div class="content">
       <span class="username">${data.user}</span>
       <span>${data.msg}</span>
