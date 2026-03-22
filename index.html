@@ -12,17 +12,70 @@
       height: 100vh;
       background-color: #36393f;
       color: #dcddde;
+      transition: background 0.3s, color 0.3s;
     }
     #topBar {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       padding: 10px 20px;
       background: #2f3136;
       font-weight: bold;
       font-size: 1.2em;
-      color: #7289da; /* Discord mor/indigo */
+      color: #7289da;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    #settingsBtn {
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 5px;
+      color: #dcddde;
+      transition: transform 0.3s ease;
+    }
+    #settingsBtn.rotate { transform: rotate(90deg); }
+    #settingsMenu {
+      position: absolute;
+      top: 40px;
+      right: 20px;
+      background: #2f3136;
+      border: 1px solid #202225;
+      border-radius: 6px;
+      padding: 10px;
+      z-index: 100;
+      width: 200px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.2s ease-in-out;
+    }
+    #settingsMenu.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #settingsMenu label {
+      display: block;
+      margin: 5px 0 2px 0;
+      font-size: 0.9em;
+    }
+    #settingsMenu input[type="text"] {
+      width: 100%;
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #202225;
+      background: #303339;
+      color: #dcddde;
+    }
+    #settingsMenu button {
+      margin-top: 8px;
+      padding: 5px 8px;
+      background: #7289da;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
     }
     #chat {
       flex: 1;
@@ -78,7 +131,7 @@
       color: #dcddde;
     }
     #message { flex: 3; }
-    button {
+    button.sendBtn {
       padding: 5px 10px;
       border-radius: 4px;
       border: none;
@@ -86,13 +139,28 @@
       color: white;
       cursor: pointer;
     }
-    button:hover { background: #5b6eae; }
+    button.sendBtn:hover { background: #5b6eae; }
     ::placeholder { color: #72767d; }
   </style>
 </head>
 <body>
 
-<div id="topBar">BucaOnline</div>
+<div id="topBar">
+  BucaOnline
+  <span id="settingsBtn">&#9881;</span>
+  <div id="settingsMenu">
+    <label for="themeToggle">Tema:</label>
+    <button id="themeToggle">Koyu / Açık</button>
+
+    <label for="newAvatar">Avatar URL:</label>
+    <input type="text" id="newAvatar" placeholder="Yeni avatar URL">
+    <button onclick="updateAvatar()">Güncelle</button>
+
+    <label for="newName">Kullanıcı adı:</label>
+    <input type="text" id="newName" placeholder="Yeni kullanıcı adı">
+    <button onclick="updateUsername()">Güncelle</button>
+  </div>
+</div>
 
 <div id="chat"></div>
 
@@ -100,12 +168,11 @@
   <input id="username" placeholder="kullanıcı adı">
   <input id="avatarURL" placeholder="profil foto URL">
   <input id="message" placeholder="mesaj">
-  <button onclick="sendMessage()">Gönder</button>
+  <button class="sendBtn" onclick="sendMessage()">Gönder</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyAqbYGSNuwx865xCNWUiHxtnaXd1WfLTsk",
@@ -116,11 +183,50 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+let currentAvatar = "";
+let currentUsername = "";
+
+// Ayarlar menüsünü aç/kapa animasyonlu + dişli döndürme
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsMenu = document.getElementById("settingsMenu");
+settingsBtn.onclick = () => {
+  settingsMenu.classList.toggle("show");
+  settingsBtn.classList.toggle("rotate");
+}
+
+// Tema toggle
+const themeToggle = document.getElementById("themeToggle");
+themeToggle.onclick = () => {
+  if(document.body.style.backgroundColor === "white") {
+    document.body.style.backgroundColor = "#36393f";
+    document.body.style.color = "#dcddde";
+  } else {
+    document.body.style.backgroundColor = "white";
+    document.body.style.color = "black";
+  }
+}
+
+// Avatar ve isim güncelleme
+function updateAvatar() {
+  const val = document.getElementById("newAvatar").value.trim();
+  if(val) currentAvatar = val;
+  document.getElementById("newAvatar").value = "";
+}
+function updateUsername() {
+  const val = document.getElementById("newName").value.trim();
+  if(val) currentUsername = val;
+  document.getElementById("newName").value = "";
+}
+
 function sendMessage() {
-  const user = document.getElementById("username").value.trim();
+  const userInput = document.getElementById("username").value.trim();
   const msg = document.getElementById("message").value.trim();
-  const avatar = document.getElementById("avatarURL").value.trim() || "https://scontent.fadb3-2.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s32x32&_nc_cat=110&ccb=1-7&_nc_sid=136b72&_nc_ohc=bk47vAGNFjMQ7kNvwFEK4tM&_nc_oc=Adr1vaFWrpS8wi1zKH-yzkKotvyHIcQgWUMwugOXW2LaRICy-SyENXd72tlVgOgSpIc&_nc_zt=24&_nc_ht=scontent.fadb3-2.fna&_nc_ss=7a30f&oh=00_Afx9---DW0xHR4sKU9RMIWrio8mRxSjfVfZ55Qjp0OAXBw&oe=69E702FA";
-  if (!user || !msg) return;
+  const avatarInput = document.getElementById("avatarURL").value.trim();
+
+  const user = currentUsername || userInput;
+  const avatar = currentAvatar || avatarInput || "https://i.imgur.com/8Km9tLL.png";
+
+  if(!user || !msg) return;
 
   const timestamp = Date.now();
   db.ref("messages").push({ user, msg, avatar, timestamp });
@@ -135,11 +241,11 @@ db.ref("messages").on("child_added", snapshot => {
   div.className = "message";
 
   const date = new Date(data.timestamp);
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2,'0');
+  const minutes = String(date.getMinutes()).padStart(2,'0');
 
   div.innerHTML = `
-    <img class="avatar" src="${data.avatar}" onerror="this.src='https://scontent.fadb3-2.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png_s32x32&_nc_cat=110&ccb=1-7&_nc_sid=136b72&_nc_ohc=bk47vAGNFjMQ7kNvwFEK4tM&_nc_oc=Adr1vaFWrpS8wi1zKH-yzkKotvyHIcQgWUMwugOXW2LaRICy-SyENXd72tlVgOgSpIc&_nc_zt=24&_nc_ht=scontent.fadb3-2.fna&_nc_ss=7a30f&oh=00_Afx9---DW0xHR4sKU9RMIWrio8mRxSjfVfZ55Qjp0OAXBw&oe=69E702FA'">
+    <img class="avatar" src="${data.avatar}" onerror="this.src='https://i.imgur.com/8Km9tLL.png'">
     <div class="content">
       <span class="username">${data.user}</span>
       <span>${data.msg}</span>
